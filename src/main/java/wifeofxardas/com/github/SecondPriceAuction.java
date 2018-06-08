@@ -7,7 +7,7 @@ import org.neo.smartcontract.framework.services.neo.Runtime;
 
 public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartContract {
 
-    public static byte[] Main(String operation, Object[] args){
+    public static Object Main(String operation, Object[] args){
         Runtime.log(operation);
 
         if(args.length == 1) Runtime.log((String) args[0]);
@@ -27,19 +27,19 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         return Storage.get(Storage.currentContext(),"Greeting to the World");
     }
 
-    public static byte[] openLot () {
-        return "a".getBytes();
+    public static Object openLot () {
+        return "a";
     }
 
-    public static byte[] cancelLot () {
-        return "a".getBytes();
+    public static Object cancelLot () {
+        return "a";
     }
 
-    public static byte[] payTo () {
-        return "a".getBytes();
+    public static Object payTo () {
+        return "a";
     }
 
-    public static byte[] confirmPay () {
-        return "a".getBytes();
+    public static Object confirmPay () {
+        return "a";
     }
 }
