@@ -5,6 +5,7 @@ import org.neo.smartcontract.framework.Helper;
 import org.neo.smartcontract.framework.services.neo.Storage;
 import org.neo.smartcontract.framework.services.neo.Runtime;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,9 +18,9 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
 
         if (operation.equals("openLot")) {
             if (args.length < 3) {
-                throw new Error("Not enough arguments");
+                return false;
             }
-            return SecondPriceAuction.openLot((String) args[0], (String) args[1], (String) args[2]);
+            return SecondPriceAuction.openLot(args[0], (String) args[1], (String) args[2]);
         } else if (operation.equals("cancelLot")) {
             return SecondPriceAuction.cancelLot();
         } else if (operation.equals("payTo")) {
@@ -32,26 +33,36 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         return Storage.get(Storage.currentContext(),"Greeting to the World");
     }
 
-    public static Object openLot (String owner, String name, String desc) {
-        Map <String, String> hashMap = new HashMap<String, String>();
+    public static Object openLot (Object owner, String name, String desc) {
+        if(!Runtime.checkWitness((byte[]) owner)) {
+            return false;
+        }
+        BigInteger id = SecondPriceAuction.getId();
+        String lotId = "lots." + String.valueOf(id);
+        String idsListId = "lots." + String.valueOf(owner) + ".ids";
+        String currentOwnerIds = String.valueOf(Storage.get(Storage.currentContext(), idsListId));
 
-        int id =
+        Storage.put(Storage.currentContext(), lotId + ".owner", (byte[]) owner);
+        Storage.put(Storage.currentContext(), lotId + ".name", name);
+        Storage.put(Storage.currentContext(), lotId + ".desc", desc);
 
-        hashMap.put("id", String.valueOf(id);
-
-        hashMap.put("owner", owner);
-        hashMap.put("name", name);
-        hashMap.put("desc", desc);
-
-        Storage.put(Storage.currentContext(), String.format("%s", owner), hashMap.toString());
+        Storage.put(
+            Storage.currentContext(),
+                idsListId,
+            currentOwnerIds + ";" + String.valueOf(id)
+        );
 
         return true;
     }
 
-    public static int getId () {
-        int id = Integer.parseInt((String.valueOf(Storage.get(Storage.currentContext(), "currentId"))));
+    public static BigInteger getId () {
+        BigInteger id = new BigInteger(String.valueOf(Storage.get(Storage.currentContext(), "currentId")));
+
+        id.add(BigInteger.ONE);
 
         Storage.put(Storage.currentContext(), "currentId", String.valueOf(id));
+
+        id.subtract(BigInteger.ONE);
 
         return id;
     }
@@ -61,9 +72,9 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
     }
 
     public static Object payTo () {
-        Map <Integer, String> hashMap = new HashMap<Integer, String>();
-        hashMap.put(228, "papirosim");
-        return hashMap;
+//        Map <BigInteger, String> hashMap = new HashMap<BigInteger, String>();
+//        hashMap.put(228, "papirosim");
+        return "";
     }
 
     public static Object confirmPay () {
