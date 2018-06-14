@@ -27,6 +27,8 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
             return SecondPriceAuction.payTo();
         } else if (operation.equals("confirmPay")) {
             return SecondPriceAuction.confirmPay();
+        } else if (operation.equals("getId")) {
+            return SecondPriceAuction.getId();
         }
 
         Storage.put(Storage.currentContext(), "Greeting to the World", "Hello World!");
@@ -37,32 +39,34 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         if(!Runtime.checkWitness((byte[]) owner)) {
             return false;
         }
-        BigInteger id = SecondPriceAuction.getId();
-        String lotId = "lots." + String.valueOf(id);
-        String idsListId = "lots." + String.valueOf(owner) + ".ids";
-        String currentOwnerIds = String.valueOf(Storage.get(Storage.currentContext(), idsListId));
-
-        Storage.put(Storage.currentContext(), lotId + ".owner", (byte[]) owner);
-        Storage.put(Storage.currentContext(), lotId + ".name", name);
-        Storage.put(Storage.currentContext(), lotId + ".desc", desc);
-
-        Storage.put(
-            Storage.currentContext(),
-                idsListId,
-            currentOwnerIds + ";" + String.valueOf(id)
-        );
+//        BigInteger id = SecondPriceAuction.getId();
+//        String lotId = "lots." + String.valueOf(id);
+//        String idsListId = "lots." + String.valueOf(owner) + ".ids";
+//        String currentOwnerIds = String.valueOf(Storage.get(Storage.currentContext(), idsListId));
+//
+//        Storage.put(Storage.currentContext(), lotId + ".owner", (byte[]) owner);
+//        Storage.put(Storage.currentContext(), lotId + ".name", name);
+//        Storage.put(Storage.currentContext(), lotId + ".desc", desc);
+//
+//        Storage.put(
+//            Storage.currentContext(),
+//                idsListId,
+//            currentOwnerIds + ";" + String.valueOf(id)
+//        );
 
         return true;
     }
 
     public static BigInteger getId () {
-        BigInteger id = new BigInteger(String.valueOf(Storage.get(Storage.currentContext(), "currentId")));
+        BigInteger id = Helper.asBigInteger(Storage.get(Storage.currentContext(), "currentId"));
 
-        id.add(BigInteger.ONE);
+        if (Helper.asString(Helper.asByteArray(id)) == "") {
+            id = BigInteger.valueOf(1);
+        } else {
+            id = id.add(BigInteger.ONE);
+        }
 
-        Storage.put(Storage.currentContext(), "currentId", String.valueOf(id));
-
-        id.subtract(BigInteger.ONE);
+        Storage.put(Storage.currentContext(), "currentId", id);
 
         return id;
     }
