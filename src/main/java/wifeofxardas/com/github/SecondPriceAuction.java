@@ -8,11 +8,6 @@ import java.math.BigInteger;
 
 public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartContract {
     public static Object Main(String operation, Object[] args){
-        Runtime.log(operation);
-
-//        if(args.length == 1) Runtime.log((String) args[0]);
-//        if(args.length == 2) Runtime.log((String) args[1]);
-
         if (operation.equals("openLot")) {
             if (args.length < 4) {
                 return false;
@@ -20,7 +15,11 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
 
             return SecondPriceAuction.openLot(args[0], (String) args[1], (String) args[2], args[3]);
         } else if (operation.equals("cancelLot")) {
-            return SecondPriceAuction.cancelLot();
+            if (args.length < 2) {
+                return false;
+            }
+
+            return SecondPriceAuction.cancelLot(args[0], args[1]);
         } else if (operation.equals("payTo")) {
             return SecondPriceAuction.payTo();
         } else if (operation.equals("confirmPay")) {
@@ -40,33 +39,32 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         }
 
         BigInteger id = SecondPriceAuction.getId();
-
-        Runtime.log(SecondPriceAuction.stringConcat("a", "b"));
-
         String lotId = SecondPriceAuction.stringConcat("lots.", String.valueOf(id));
-        String idsListId = SecondPriceAuction.stringConcat(
-            SecondPriceAuction.stringConcat(
-               SecondPriceAuction.stringConcat("lots.", String.valueOf(id)), String.valueOf(owner)
-            ),
-        ".ids"
-        );
-
-        String currentOwnerIds = String.valueOf(Storage.get(Storage.currentContext(), idsListId));
 
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".owner"), (String) owner);
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".name"), name);
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".desc"), desc);
 
-        Storage.put(
-            Storage.currentContext(),
-                idsListId,
-            SecondPriceAuction.stringConcat(
-                SecondPriceAuction.stringConcat(currentOwnerIds, ";"),
-                String.valueOf(id)
-            )
-        );
+        SecondPriceAuction.addIdToOwner(owner, String.valueOf(id));
 
         return "true";
+    }
+
+    public static void addIdToOwner (Object owner, String id) {
+        String idsListId = SecondPriceAuction.stringConcat(
+                String.valueOf(owner), ".lots"
+        );
+
+        String currentOwnerIds = Helper.asString(Storage.get(Storage.currentContext(), idsListId));
+
+        Storage.put(
+                Storage.currentContext(),
+                idsListId,
+                SecondPriceAuction.stringConcat(
+                        SecondPriceAuction.stringConcat(currentOwnerIds, ";"),
+                        id
+                )
+        );
     }
 
     public static String stringConcat (String a, String b) {
@@ -87,8 +85,42 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         return id;
     }
 
-    public static Object cancelLot () {
-        return new String[]{"aa", "sb"};
+    public static String cancelLot (Object caller, Object id) {
+        if(!Runtime.checkWitness((byte[]) caller)) {
+            Runtime.log("Failed witness check");
+            return "false";
+        }
+
+        String lotId = SecondPriceAuction.stringConcat("lots.", String.valueOf(id));
+        byte[] owner = Storage.get(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".owner"));
+
+        if (owner == (byte[]) caller) {
+            String idsListId = SecondPriceAuction.stringConcat(
+                    String.valueOf(caller), ".lots"
+            );
+            SecondPriceAuction.deleteLot(lotId);
+
+            String currentOwnerIds = Helper.asString(Storage.get(Storage.currentContext(), idsListId));
+
+            Storage.put(
+                    Storage.currentContext(),
+                    idsListId,
+                    SecondPriceAuction.stringConcat(
+                            SecondPriceAuction.stringConcat(currentOwnerIds, ";"),
+                            String.valueOf(id)
+                    )
+            );
+        } else {
+            return "false";
+        }
+
+        return "true";
+    }
+
+    public static void deleteLot (String lotId) {
+        Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".owner"));
+        Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".name"));
+        Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".desc"));
     }
 
     public static Object payTo () {
