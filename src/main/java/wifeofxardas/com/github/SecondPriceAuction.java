@@ -135,7 +135,8 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
                 ),
                 Helper.asString(
                         Helper.range(
-                                Helper.asByteArray(currentOwnerIds), index + id.length(), currentOwnerIds.length()
+                                // id.length + 1 bcs we have ';'лщ
+                                Helper.asByteArray(currentOwnerIds), index + id.length() + 1, currentOwnerIds.length()
                         )
                 )
             )
