@@ -123,25 +123,22 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".desc"));
     }
 
-    public static String indexOf () {
+    public static long indexOf (String where, String what) {
         long resultIndex = -1;
-        int currentIndex = 0;
-        int searchIndex = 0;
 
-        byte[] string = Helper.asByteArray("supermegastring");
-        byte[] a = Helper.asByteArray("mega");
-        byte[] searchOne = Helper.asByteArray("bring");
+        byte[] string = Helper.asByteArray(where);
+        byte[] search = Helper.asByteArray(what);
 
-        if (string.length < searchOne.length) {
-            return String.valueOf(resultIndex);
+        if (string.length < search.length) {
+            return resultIndex;
         }
 
-        for(currentIndex = 0; currentIndex < string.length; currentIndex++) {
-            if (string[currentIndex] == searchOne[searchIndex]) {
+        for(int currentIndex = 0; currentIndex < string.length; currentIndex++) {
+            if (string[currentIndex] == search[0]) {
                 resultIndex = Long.valueOf(String.valueOf(currentIndex));
 
-                for (searchIndex = 0; searchIndex < searchOne.length; searchIndex++) {
-                    if (searchOne[searchIndex] != string[currentIndex + searchIndex]) {
+                for (int searchIndex = 0; searchIndex < search.length; searchIndex++) {
+                    if (search[searchIndex] != string[currentIndex + searchIndex]) {
                         resultIndex = -1;
                         break;
                     }
@@ -153,7 +150,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
             }
         }
 
-        return String.valueOf(resultIndex);
+        return resultIndex;
     }
 
     public static Object payTo () {
