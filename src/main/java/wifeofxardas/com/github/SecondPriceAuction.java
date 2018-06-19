@@ -20,6 +20,12 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
             }
 
             return SecondPriceAuction.cancelLot(args[0], args[1]);
+        } else if (operation.equals("getLots")) {
+            if (args.length < 1) {
+                return false;
+            }
+
+            return SecondPriceAuction.getLots(args[0]);
         } else if (operation.equals("payTo")) {
             return SecondPriceAuction.payTo();
         } else if (operation.equals("confirmPay")) {
@@ -44,6 +50,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".owner"), (String) owner);
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".name"), name);
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".desc"), desc);
+        Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".state"), "open");
 
         SecondPriceAuction.addIdToOwner(owner, String.valueOf(id));
 
@@ -61,8 +68,8 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
                 Storage.currentContext(),
                 idsListId,
                 SecondPriceAuction.stringConcat(
-                        SecondPriceAuction.stringConcat(currentOwnerIds, ";"),
-                        id
+                        SecondPriceAuction.stringConcat(currentOwnerIds, id),
+                        ";"
                 )
         );
     }
@@ -100,16 +107,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
             );
             SecondPriceAuction.deleteLot(lotId);
 
-            String currentOwnerIds = Helper.asString(Storage.get(Storage.currentContext(), idsListId));
-
-            Storage.put(
-                    Storage.currentContext(),
-                    idsListId,
-                    SecondPriceAuction.stringConcat(
-                            SecondPriceAuction.stringConcat(currentOwnerIds, ";"),
-                            String.valueOf(id)
-                    )
-            );
+            SecondPriceAuction.deleteLotFromOwner(owner, String.valueOf(id));
         } else {
             return "false";
         }
@@ -117,14 +115,50 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         return "true";
     }
 
+    public static String deleteLotFromOwner (Object owner, String id) {
+        String idsListId = SecondPriceAuction.stringConcat(
+                String.valueOf(owner), ".lots"
+        );
+        String currentOwnerIds = Helper.asString(Storage.get(Storage.currentContext(), idsListId));
+        int index = SecondPriceAuction.indexOf(currentOwnerIds, id);
+
+
+
+        Storage.put(
+            Storage.currentContext(),
+            idsListId,
+            SecondPriceAuction.stringConcat(
+                Helper.asString(
+                    Helper.range(
+                            Helper.asByteArray(currentOwnerIds), 0, index
+                    )
+                ),
+                Helper.asString(
+                        Helper.range(
+                                Helper.asByteArray(currentOwnerIds), index + id.length(), currentOwnerIds.length()
+                        )
+                )
+            )
+        );
+
+        return String.valueOf(index);
+    }
+
     public static void deleteLot (String lotId) {
         Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".owner"));
         Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".name"));
         Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".desc"));
+        Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".state"));
     }
 
-    public static long indexOf (String where, String what) {
-        long resultIndex = -1;
+    public static String getLots (Object owner) {
+        return Helper.asString(
+                Storage.get(Storage.currentContext(), SecondPriceAuction.stringConcat((String) owner, ".lots"))
+        );
+    }
+
+    public static int indexOf (String where, String what) {
+        int resultIndex = -1;
 
         byte[] string = Helper.asByteArray(where);
         byte[] search = Helper.asByteArray(what);
@@ -135,7 +169,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
 
         for(int currentIndex = 0; currentIndex < string.length; currentIndex++) {
             if (string[currentIndex] == search[0]) {
-                resultIndex = Long.valueOf(String.valueOf(currentIndex));
+                resultIndex = currentIndex;
 
                 for (int searchIndex = 0; searchIndex < search.length; searchIndex++) {
                     if (search[searchIndex] != string[currentIndex + searchIndex]) {
