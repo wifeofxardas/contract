@@ -123,6 +123,39 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".desc"));
     }
 
+    public static String indexOf () {
+        long resultIndex = -1;
+        int currentIndex = 0;
+        int searchIndex = 0;
+
+        byte[] string = Helper.asByteArray("supermegastring");
+        byte[] a = Helper.asByteArray("mega");
+        byte[] searchOne = Helper.asByteArray("bring");
+
+        if (string.length < searchOne.length) {
+            return String.valueOf(resultIndex);
+        }
+
+        for(currentIndex = 0; currentIndex < string.length; currentIndex++) {
+            if (string[currentIndex] == searchOne[searchIndex]) {
+                resultIndex = Long.valueOf(String.valueOf(currentIndex));
+
+                for (searchIndex = 0; searchIndex < searchOne.length; searchIndex++) {
+                    if (searchOne[searchIndex] != string[currentIndex + searchIndex]) {
+                        resultIndex = -1;
+                        break;
+                    }
+                }
+
+                if (resultIndex != -1) {
+                    break;
+                }
+            }
+        }
+
+        return String.valueOf(resultIndex);
+    }
+
     public static Object payTo () {
 //        Map <BigInteger, String> hashMap = new HashMap<BigInteger, String>();
 //        hashMap.put(228, "papirosim");
