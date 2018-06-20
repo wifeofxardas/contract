@@ -65,10 +65,6 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
 
     }
 
-    public static void closeLot () {
-
-    }
-
     public static void addIdToOwner (Object owner, String id) {
         String idsListId = SecondPriceAuction.stringConcat(
                 String.valueOf(owner), ".lots"
@@ -117,7 +113,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
             String idsListId = SecondPriceAuction.stringConcat(
                     String.valueOf(caller), ".lots"
             );
-            SecondPriceAuction.deleteLot(lotId);
+            SecondPriceAuction.closeLot(lotId, "canceled");
 
             SecondPriceAuction.deleteLotFromOwner(owner, String.valueOf(id));
         } else {
@@ -178,13 +174,14 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         return "true";
     }
 
-    public static void deleteLot (String lotId) {
-        Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".owner"));
-        Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".name"));
-        Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".desc"));
-        Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".price"));
-        Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".dueTime"));
-        Storage.delete(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".state"));
+    public static void closeLot(String lotId, String state) {
+        Storage.put(
+                Storage.currentContext(),
+                SecondPriceAuction.stringConcat(
+                        lotId, ".state"
+                ),
+                state
+        );
     }
 
     public static String getLots (Object owner) {
