@@ -47,14 +47,6 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
             return "false";
         }
 
-//        long now = System.currentTimeMillis();
-//
-//        if((dueTime - now) > 86400000 || (dueTime - now) <= 600000) {
-//            Runtime.log("Wrong due date");
-//            return "false";
-//        }
-
-
         BigInteger id = SecondPriceAuction.getId();
         String lotId = SecondPriceAuction.stringConcat("lots.", String.valueOf(id));
 
@@ -62,11 +54,6 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".name"), name);
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".desc"), desc);
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".price"), price);
-//        Storage.put(
-//            Storage.currentContext(),
-//            SecondPriceAuction.stringConcat(lotId, ".dueTime"),
-//            String.valueOf(dueTime)
-//        );
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".state"), "open");
 
         SecondPriceAuction.addIdToOwner(owner, String.valueOf(id));
