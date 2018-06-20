@@ -29,6 +29,12 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
             }
 
             return SecondPriceAuction.getLots(args[0]);
+        } else if (operation.equals("getClosedLots")) {
+            if (args.length < 1) {
+                return false;
+            }
+
+            return SecondPriceAuction.getClosedLots(args[0]);
         } else if (operation.equals("placeStake")) {
             if (args.length < 3) {
                 return false;
@@ -193,6 +199,104 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         );
     }
 
+    public static String getClosedLots (Object owner) {
+        return Helper.asString(
+                Storage.get(Storage.currentContext(), SecondPriceAuction.stringConcat((String) owner, ".closedLots"))
+        );
+    }
+
+    /**
+     * Place stake.
+     *
+     * Add stake hash to [placerAdd].stakes.[lotId] storage key
+     * @param placer placer address
+     * @param id lot id
+     * @param stakeHash hash of stake value
+     * @return true\false
+     */
+    public static Object placeStake (Object placer, String id, String stakeHash) {
+        if (
+            !SecondPriceAuction.getLotState(id).equals("open")
+        ) {
+            Runtime.log("Can not find lot or it closed");
+            return "false";
+        }
+
+        String currentPlacerStake = SecondPriceAuction.getHashedStake((String) placer, id);
+
+        if (!currentPlacerStake.equals("")) {
+            Runtime.log("Can not change stake hash");
+            return "false";
+        }
+
+        String lotId = SecondPriceAuction.stringConcat("lots.", String.valueOf(id));
+        String currentStakes = Helper.asString(Storage.get(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, "stakes")));
+
+        Storage.put(
+                Storage.currentContext(),
+                SecondPriceAuction.stringConcat(
+                        lotId,
+                        ".stakes"
+                ),
+                SecondPriceAuction.stringConcat(
+                        SecondPriceAuction.stringConcat(currentStakes, (String) placer),
+                        ";"
+                )
+        );
+
+        SecondPriceAuction.addStakeHashToUser(placer, id, stakeHash);
+
+        return "true";
+    }
+
+    public static String getLotState(String id) {
+        return Helper.asString(
+                Storage.get(
+                        Storage.currentContext(),
+                        SecondPriceAuction.stringConcat(
+                                SecondPriceAuction.stringConcat(
+                                        "lots.",
+                                        id
+                                ),
+                                ".state"
+                        )
+                )
+        );
+    }
+
+    public static String getHashedStake (String placer, String lotId) {
+        return Helper.asString(
+                Storage.get(
+                        Storage.currentContext(),
+                        SecondPriceAuction.stringConcat(
+                                placer,
+                                SecondPriceAuction.stringConcat(".stakes.hashed", lotId)
+                        )
+                )
+        );
+    }
+
+    /**
+     * add stake's hash to user
+     * @param userAddress neo address
+     * @param lotId lot id
+     * @param stakeHash stake hash
+     */
+    public static void addStakeHashToUser (Object userAddress, String lotId, String stakeHash) {
+        Storage.put(
+                Storage.currentContext(),
+                SecondPriceAuction.stringConcat(
+                        (String) userAddress,
+                        SecondPriceAuction.stringConcat(".stakes.hashed", lotId)
+                ),
+                stakeHash
+        );
+    }
+
+    public static Object confirmPay () {
+        return "a";
+    }
+
     public static int indexOf (String where, String what) {
         int resultIndex = -1;
 
@@ -221,78 +325,5 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         }
 
         return resultIndex;
-    }
-
-    /**
-     * Place stake.
-     *
-     * Add stake hash to [placerAdd].stakes.[lotId] storage key
-     * @param placer placer address
-     * @param id lot id
-     * @param stakeHash hash of stake value
-     * @return true\false
-     */
-    public static Object placeStake (Object placer, String id, String stakeHash) {
-        if (!Helper.asString(Storage.get(Storage.currentContext(), SecondPriceAuction.stringConcat("lots.state", id))).equals("open")) {
-            Runtime.log("Can not find lot or it closed");
-            return "false";
-        }
-
-        String currentPlacerStake = Helper.asString(
-            Storage.get(
-                Storage.currentContext(),
-                SecondPriceAuction.stringConcat(
-                    (String) placer,
-                    SecondPriceAuction.stringConcat(".stakes.hashed", id)
-                )
-            )
-        );
-
-        if (currentPlacerStake.equals("")) {
-            Runtime.log("Can not change stake hash");
-            return "false";
-        }
-
-        String lotId = SecondPriceAuction.stringConcat("lots.", String.valueOf(id));
-        String currentStakes = Helper.asString(Storage.get(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, "stakes")));
-
-        Storage.put(
-                Storage.currentContext(),
-                SecondPriceAuction.stringConcat(
-                        lotId,
-                        ".stakes"
-                ),
-                SecondPriceAuction.stringConcat(
-                        SecondPriceAuction.stringConcat(currentStakes, (String) placer),
-                        ";"
-                )
-        );
-
-        SecondPriceAuction.addStakeHashToUser(placer, id, stakeHash);
-
-        return "true";
-    }
-
-
-
-    /**
-     * add stake's hash to user
-     * @param userAddress neo address
-     * @param lotId lot id
-     * @param stakeHash stake hash
-     */
-    public static void addStakeHashToUser (Object userAddress, String lotId, String stakeHash) {
-        Storage.put(
-                Storage.currentContext(),
-                SecondPriceAuction.stringConcat(
-                        (String) userAddress,
-                        SecondPriceAuction.stringConcat(".stakes.hashed", lotId)
-                ),
-                stakeHash
-        );
-    }
-
-    public static Object confirmPay () {
-        return "a";
     }
 }

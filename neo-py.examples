@@ -1,4 +1,4 @@
-testinvoke 0x507185f48a927617d2a7bcba1f468ee8858e2108 getLots ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y"]
-testinvoke 0x507185f48a927617d2a7bcba1f468ee8858e2108 openLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "name", "desc", "228"]
-testinvoke 0x507185f48a927617d2a7bcba1f468ee8858e2108 placeStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 1, "228"]
-testinvoke 0x507185f48a927617d2a7bcba1f468ee8858e2108 cancelLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "1"]
+testinvoke 0x108803f622f0e652a24ab0c578c3a9a90997fb1f getLots ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y"]
+testinvoke 0x108803f622f0e652a24ab0c578c3a9a90997fb1f openLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "name", "desc", "228"]
+testinvoke 0x108803f622f0e652a24ab0c578c3a9a90997fb1f placeStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 1, "228"]
+testinvoke 0x108803f622f0e652a24ab0c578c3a9a90997fb1f cancelLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "1"]
