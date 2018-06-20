@@ -1,6 +1,7 @@
 package wifeofxardas.com.github;
 
 import org.neo.smartcontract.framework.Helper;
+import org.neo.smartcontract.framework.SmartContract;
 import org.neo.smartcontract.framework.services.neo.Storage;
 import org.neo.smartcontract.framework.services.neo.Runtime;
 
@@ -38,8 +39,13 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         return false;
       }
       return SecondPriceAuction.placeStake(args[0], (String) args[1], (String) args[2]);
-    } else if (operation.equals("confirmPay")) {
-      return SecondPriceAuction.confirmPay();
+    } else if (operation.equals("confirmStake")) {
+      if (args.length < 4) {
+        return false;
+      }
+
+      return SecondPriceAuction.confirmStake(
+          args[0], (String) args[1], (String) args[2], (String) args[3]);
     } else if (operation.equals("getId")) {
       return SecondPriceAuction.getId();
     }
@@ -111,9 +117,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         Storage.get(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".owner"));
 
     if (owner == (byte[]) caller) {
-      String idsListId = SecondPriceAuction.stringConcat(String.valueOf(caller), ".lots");
       SecondPriceAuction.closeLot(lotId, "canceled");
-
       SecondPriceAuction.deleteLotFromOwner(owner, String.valueOf(id));
     } else {
       return "false";
@@ -214,6 +218,30 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
     return "true";
   }
 
+  public static String confirmStake(Object placer, String id, String stake, String stakeSalt) {
+    //      if(SecondPriceAuction.placerBanned(placer))
+    if (!SecondPriceAuction.getLotState(id).equals("open")) {
+      Runtime.log("Can not find lot or it closed");
+      return "false";
+    }
+
+    String currentPlacerStakeHash = SecondPriceAuction.getHashedStake((String) placer, id);
+
+    if (!currentPlacerStakeHash.equals(
+        Helper.asString(
+            SmartContract.sha256(
+                Helper.concat(Helper.asByteArray(stake), Helper.asByteArray(stakeSalt)))))) {
+      Runtime.log("Hash does not equal stake + salt");
+      //      todo not sure
+      //      SecondPriceAuction.banPlacer(placer)
+      return "false";
+    }
+
+    SecondPriceAuction.addStakeToUser(placer, id, stake);
+
+    return "true";
+  }
+
   public static String getLotState(String id) {
     return Helper.asString(
         Storage.get(
@@ -244,6 +272,14 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
             (String) userAddress, SecondPriceAuction.stringConcat(".stakes.hashed", lotId)),
         stakeHash);
   }
+
+    public static void addStakeToUser(Object userAddress, String lotId, String stake) {
+        Storage.put(
+                Storage.currentContext(),
+                SecondPriceAuction.stringConcat(
+                        (String) userAddress, SecondPriceAuction.stringConcat(".stakes.", lotId)),
+                stake);
+    }
 
   public static Object confirmPay() {
     return "a";
