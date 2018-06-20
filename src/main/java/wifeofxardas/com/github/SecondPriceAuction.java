@@ -9,13 +9,13 @@ import java.math.BigInteger;
 public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartContract {
     public static Object Main(String operation, Object[] args){
         if (operation.equals("openLot")) {
-            if (args.length < 5) {
+            if (args.length < 4) {
                 return false;
             }
 
             return SecondPriceAuction.openLot(
                     args[0], (String) args[1], (String) args[2],
-                    (String) args[3], (long) args[4]
+                    (String) args[3]
             );
         } else if (operation.equals("cancelLot")) {
             if (args.length < 2) {
@@ -41,18 +41,18 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         return Storage.get(Storage.currentContext(),"Greeting to the World");
     }
 
-    public static String openLot (Object owner, String name, String desc, String price, long dueTime) {
+    public static String openLot (Object owner, String name, String desc, String price) {
         if(!Runtime.checkWitness((byte[]) owner)) {
             Runtime.log("Failed witness check");
             return "false";
         }
 
-        long now = System.currentTimeMillis();
-
-        if((dueTime - now) > 86400000 || (dueTime - now) <= 600000) {
-            Runtime.log("Wrong due date");
-            return "false";
-        }
+//        long now = System.currentTimeMillis();
+//
+//        if((dueTime - now) > 86400000 || (dueTime - now) <= 600000) {
+//            Runtime.log("Wrong due date");
+//            return "false";
+//        }
 
 
         BigInteger id = SecondPriceAuction.getId();
@@ -62,11 +62,11 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".name"), name);
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".desc"), desc);
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".price"), price);
-        Storage.put(
-            Storage.currentContext(),
-            SecondPriceAuction.stringConcat(lotId, ".dueTime"),
-            String.valueOf(dueTime)
-        );
+//        Storage.put(
+//            Storage.currentContext(),
+//            SecondPriceAuction.stringConcat(lotId, ".dueTime"),
+//            String.valueOf(dueTime)
+//        );
         Storage.put(Storage.currentContext(), SecondPriceAuction.stringConcat(lotId, ".state"), "open");
 
         SecondPriceAuction.addIdToOwner(owner, String.valueOf(id));
