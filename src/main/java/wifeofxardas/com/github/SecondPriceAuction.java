@@ -273,13 +273,13 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         stakeHash);
   }
 
-    public static void addStakeToUser(Object userAddress, String lotId, String stake) {
-        Storage.put(
-                Storage.currentContext(),
-                SecondPriceAuction.stringConcat(
-                        (String) userAddress, SecondPriceAuction.stringConcat(".stakes.", lotId)),
-                stake);
-    }
+  public static void addStakeToUser(Object userAddress, String lotId, String stake) {
+    Storage.put(
+        Storage.currentContext(),
+        SecondPriceAuction.stringConcat(
+            (String) userAddress, SecondPriceAuction.stringConcat(".stakes.", lotId)),
+        stake);
+  }
 
   public static Object confirmPay() {
     return "a";
