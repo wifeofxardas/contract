@@ -147,14 +147,35 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
                 ),
                 Helper.asString(
                         Helper.range(
-                                // id.length + 1 bcs we have ';'лщ
+                                // id.length + 1 bcs we have ';'
                                 Helper.asByteArray(currentOwnerIds), index + id.length() + 1, currentOwnerIds.length()
                         )
                 )
             )
         );
 
-        return String.valueOf(index);
+        SecondPriceAuction.toClosedLots(owner, id);
+
+        return "true";
+    }
+
+    public static String toClosedLots (Object owner, String id) {
+        String idsListId = SecondPriceAuction.stringConcat(
+                String.valueOf(owner), ".closedLots"
+        );
+
+        String currentOwnerIds = Helper.asString(Storage.get(Storage.currentContext(), idsListId));
+
+        Storage.put(
+                Storage.currentContext(),
+                idsListId,
+                SecondPriceAuction.stringConcat(
+                        SecondPriceAuction.stringConcat(currentOwnerIds, id),
+                        ";"
+                )
+        );
+
+        return "true";
     }
 
     public static void deleteLot (String lotId) {
