@@ -15,7 +15,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
       }
 
       return SecondPriceAuction.openLot(
-          args[0], args[1], args[2], args[3]);
+          args[0], args[1], args[2]);
     } else if (operation.equals("cancelLot")) {
       if (args.length < 2) {
         return false;
@@ -54,23 +54,22 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
     return Storage.get(Storage.currentContext(), "Greeting to the World");
   }
 
-  public static String openLot(byte[] owner, byte[] name, byte[] desc, byte[] price) {
+  public static String openLot(byte[] owner, byte[] name, byte[] desc) {
     if (!Runtime.checkWitness(owner)) {
       Runtime.log("Failed witness check");
       return "false";
     }
 
-    BigInteger id = SecondPriceAuction.getId();
-    byte[] lotId = Helper.concat(Helper.asByteArray("lots."), Helper.asByteArray(id));
+    byte[] id = SecondPriceAuction.getId();
+    byte[] lotId = Helper.concat(Helper.asByteArray("lots."),id);
 
     Storage.put(
         Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".owner")), owner);
     Storage.put(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".name")), name);
     Storage.put(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".desc")), desc);
-    Storage.put(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".price")), price);
     Storage.put(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".state")), "open");
 
-    SecondPriceAuction.addIdToOwner(owner, Helper.asByteArray((id)));
+    SecondPriceAuction.addIdToOwner(owner, id);
 
     return "true";
   }
@@ -88,18 +87,32 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         Helper.concat(Helper.concat(currentOwnerIds, id), Helper.asByteArray(";")));
   }
 
-  public static BigInteger getId() {
+  public static byte[] getId() {
     BigInteger id = Helper.asBigInteger(Storage.get(Storage.currentContext(), "currentId"));
 
     if (Helper.asString(Helper.asByteArray(id)) == "") {
-      id = BigInteger.valueOf(1);
+      id = BigInteger.ONE;
     } else {
       id = id.add(BigInteger.ONE);
     }
 
     Storage.put(Storage.currentContext(), "currentId", id);
 
-    return id;
+    return SecondPriceAuction.stringifyInt(id);
+  }
+
+  public static byte[] stringifyInt(BigInteger value) {
+    byte[] result = new byte[0];
+
+    long reminder = Long.valueOf(String.valueOf(value));
+
+    while (reminder > 0) {
+      result = Helper.concat(Helper.asByteArray(BigInteger.valueOf(reminder % 10 + 48)), result);
+
+      reminder /= 10;
+    }
+
+    return result;
   }
 
   public static String cancelLot(byte[] caller, byte[] id) {
