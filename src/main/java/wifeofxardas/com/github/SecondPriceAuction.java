@@ -1,7 +1,6 @@
 package wifeofxardas.com.github;
 
 import org.neo.smartcontract.framework.Helper;
-import org.neo.smartcontract.framework.SmartContract;
 import org.neo.smartcontract.framework.services.neo.Storage;
 import org.neo.smartcontract.framework.services.neo.Runtime;
 
@@ -14,14 +13,13 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         return false;
       }
 
-      return SecondPriceAuction.openLot(
-          args[0], args[1], args[2]);
-    } else if (operation.equals("cancelLot")) {
+      return SecondPriceAuction.openLot(args[0], args[1], args[2]);
+    } else if (operation.equals("closeLot")) {
       if (args.length < 2) {
         return false;
       }
 
-      return SecondPriceAuction.cancelLot(args[0], args[1]);
+      return SecondPriceAuction.closeLot(args[0], args[1]);
     } else if (operation.equals("getLots")) {
       if (args.length < 1) {
         return false;
@@ -44,8 +42,10 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         return false;
       }
 
-      return SecondPriceAuction.confirmStake(
-          args[0], args[1], args[2], args[3]);
+      return SecondPriceAuction.confirmStake(args[0], args[1], args[2], args[3]);
+    } else if (operation.equals("setLotWinner")) {
+      SecondPriceAuction.setLotWinner(args[0]);
+      return "sdas";
     }
 
     Storage.put(Storage.currentContext(), "Greeting to the World", "Hello World!");
@@ -59,13 +59,14 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
     }
 
     byte[] id = SecondPriceAuction.getId(Helper.asByteArray("currentId"));
-    byte[] lotId = Helper.concat(Helper.asByteArray("lots."),id);
+    byte[] lotId = Helper.concat(Helper.asByteArray("lots."), id);
 
     Storage.put(
         Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".owner")), owner);
     Storage.put(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".name")), name);
     Storage.put(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".desc")), desc);
-    Storage.put(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".state")), "open");
+    Storage.put(
+        Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".state")), "open");
 
     SecondPriceAuction.addIdToOwner(owner, id);
 
@@ -111,7 +112,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
     return result;
   }
 
-  public static String cancelLot(byte[] caller, byte[] id) {
+  public static String closeLot(byte[] caller, byte[] id) {
     if (!Runtime.checkWitness(caller)) {
       Runtime.log("Failed witness check");
       return "false";
@@ -120,16 +121,16 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
     byte[] lotId = Helper.concat(Helper.asByteArray("lots."), id);
     byte[] owner =
         Storage.get(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".owner")));
-    byte[] stakes = Storage.get(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".stakes")));
+    byte[] stakes =
+        Storage.get(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".stakes")));
 
-    if (owner == caller) {
+    if (owner == caller && SecondPriceAuction.getLotState(id).equals("open")) {
       if (!Helper.asString(stakes).equals("")) {
-        SecondPriceAuction.setLotWinner();
-        SecondPriceAuction.closeLot(lotId, Helper.asByteArray("closed"));
+        SecondPriceAuction.changeLotState(lotId, Helper.asByteArray("wait"));
       } else {
-        SecondPriceAuction.closeLot(lotId, Helper.asByteArray("canceled"));
+        SecondPriceAuction.changeLotState(lotId, Helper.asByteArray("canceled"));
+        SecondPriceAuction.deleteLotFromOwner(owner, id);
       }
-      SecondPriceAuction.deleteLotFromOwner(owner, id);
     } else {
       return "false";
     }
@@ -137,8 +138,49 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
     return "true";
   }
 
-  public static byte[] setLotWinner(byte[] id,) {
-      return Helper.asByteArray("");
+  public static void setLotWinner(byte[] id) {
+    byte[] lotId = Helper.concat(Helper.asByteArray("lots."), id);
+    BigInteger maxPlacerId =
+        Helper.asBigInteger(
+            Storage.get(
+                Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".stakes"))));
+
+    Runtime.log(Helper.asString(Helper.asByteArray(maxPlacerId)));
+    byte[] maxStake = Helper.asByteArray(BigInteger.ZERO);
+    byte[] secondMax = Helper.asByteArray(BigInteger.ZERO);
+    byte[] winner = {};
+
+    while (maxPlacerId.compareTo(BigInteger.ZERO) > 0) {
+      byte[] placerAddress =
+          Storage.get(
+              Storage.currentContext(),
+              Helper.concat(
+                  lotId,
+                  Helper.concat(
+                      Helper.asByteArray(".stakes."),
+                      SecondPriceAuction.stringifyInt(maxPlacerId))));
+
+      byte[] placerStake =
+          Storage.get(
+              Storage.currentContext(),
+              Helper.concat(placerAddress, Helper.concat(Helper.asByteArray(".stakes."), id)));
+
+      if (Helper.asBigInteger(maxStake).compareTo(Helper.asBigInteger(placerStake)) <= 0) {
+        if (Helper.asBigInteger(secondMax).compareTo(Helper.asBigInteger(maxStake)) <= 0) {
+          secondMax = maxStake;
+        }
+        maxStake = placerStake;
+        winner = placerAddress;
+      }
+
+      maxPlacerId = maxPlacerId.subtract(BigInteger.ONE);
+    }
+
+    Storage.put(
+        Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".price")), secondMax);
+
+    Storage.put(
+        Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".winner")), winner);
   }
 
   public static String deleteLotFromOwner(byte[] owner, byte[] id) {
@@ -151,12 +193,9 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
         idsListId,
         Helper.concat(
             Helper.range(currentOwnerIds, 0, index),
-
-                Helper.range(
-                    // id.length + 1 bcs we have ';'
-                    currentOwnerIds,
-                    index + id.length + 1,
-                    currentOwnerIds.length)));
+            Helper.range(
+                // id.length + 1 bcs we have ';'
+                currentOwnerIds, index + id.length + 1, currentOwnerIds.length)));
 
     SecondPriceAuction.toClosedLots(owner, id);
 
@@ -176,21 +215,20 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
     return "true";
   }
 
-  public static void closeLot(byte[] lotId, byte[] state) {
-    Storage.put(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".state")), state);
+  public static void changeLotState(byte[] lotId, byte[] state) {
+    Storage.put(
+        Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".state")), state);
   }
 
   public static String getLots(byte[] owner) {
     return Helper.asString(
-        Storage.get(
-            Storage.currentContext(), Helper.concat(owner, Helper.asByteArray(".lots"))));
+        Storage.get(Storage.currentContext(), Helper.concat(owner, Helper.asByteArray(".lots"))));
   }
 
   public static String getClosedLots(byte[] owner) {
     return Helper.asString(
         Storage.get(
-            Storage.currentContext(),
-            Helper.concat(owner, Helper.asByteArray(".closedLots"))));
+            Storage.currentContext(), Helper.concat(owner, Helper.asByteArray(".closedLots"))));
   }
 
   /**
@@ -204,6 +242,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
    * @return true\false
    */
   public static Object placeStake(byte[] placer, byte[] id, byte[] stakeHash) {
+    //      todo check witness
     if (!SecondPriceAuction.getLotState(id).equals("open")) {
       Runtime.log("Can not find lot or it closed");
       return "false";
@@ -216,14 +255,14 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
       return "false";
     }
 
-    byte[] lotId = Helper.concat(Helper.asByteArray("lots."),id);
-    byte[] placersId  = SecondPriceAuction.getId(Helper.concat(lotId, Helper.asByteArray(".stakes")));
+    byte[] lotId = Helper.concat(Helper.asByteArray("lots."), id);
+    byte[] placersId =
+        SecondPriceAuction.getId(Helper.concat(lotId, Helper.asByteArray(".stakes")));
 
     Storage.put(
-            Storage.currentContext(),
-            Helper.concat(lotId, Helper.concat(Helper.asByteArray(".stakes."), placersId)),
-            placer
-            );
+        Storage.currentContext(),
+        Helper.concat(lotId, Helper.concat(Helper.asByteArray(".stakes."), placersId)),
+        placer);
 
     SecondPriceAuction.addStakeHashToUser(placer, id, stakeHash);
 
@@ -236,15 +275,13 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
       return "false";
     }
 
-    String currentPlacerStakeHash = SecondPriceAuction.getHashedStake( placer, id);
+    String currentPlacerStakeHash = SecondPriceAuction.getHashedStake(placer, id);
 
-    if (!currentPlacerStakeHash.equals(
-        Helper.asString(
-            SmartContract.sha256(
-                Helper.concat(stake, stakeSalt))))) {
-      Runtime.log("Hash does not equal stake + salt");
-      return "false";
-    }
+    //    if (!currentPlacerStakeHash.equals(
+    //        Helper.asString(SmartContract.sha256(Helper.concat(stake, stakeSalt))))) {
+    //      Runtime.log("Hash does not equal stake + salt");
+    //      return "false";
+    //    }
 
     SecondPriceAuction.addStakeToUser(placer, id, stake);
 
@@ -263,8 +300,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
     return Helper.asString(
         Storage.get(
             Storage.currentContext(),
-                Helper.concat(
-                placer, Helper.concat(Helper.asByteArray(".stakes.hashed"), lotId))));
+            Helper.concat(placer, Helper.concat(Helper.asByteArray(".stakes.hashed"), lotId))));
   }
 
   /**
@@ -277,16 +313,14 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
   public static void addStakeHashToUser(byte[] userAddress, byte[] lotId, byte[] stakeHash) {
     Storage.put(
         Storage.currentContext(),
-        Helper.concat(
-            userAddress, Helper.concat(Helper.asByteArray(".stakes.hashed"), lotId)),
+        Helper.concat(userAddress, Helper.concat(Helper.asByteArray(".stakes.hashed"), lotId)),
         stakeHash);
   }
 
   public static void addStakeToUser(byte[] userAddress, byte[] lotId, byte[] stake) {
     Storage.put(
         Storage.currentContext(),
-        Helper.concat(
-            userAddress, Helper.concat(Helper.asByteArray(".stakes."), lotId)),
+        Helper.concat(userAddress, Helper.concat(Helper.asByteArray(".stakes."), lotId)),
         stake);
   }
 
