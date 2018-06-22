@@ -1,19 +1,21 @@
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 getLots ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y"]
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 setLotWinner ["49"]
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 openLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "name", "desc"]
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 placeStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "aaa"]
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 confirmStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "aaa", 1]
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 cancelLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "1"]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d getLots ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y"]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d setLotWinner ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "50"]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d openLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "name", "desc"]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d placeStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "aaa"]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d confirmStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "aaa", 1]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d cancelLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "1"]
+
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d closeLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 50]
 
 
 
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 placeStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "55"]
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 confirmStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "55", 1]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d placeStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 50, "55"]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d confirmStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 50, "55", 1]
 
 
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 placeStake ["aa", 49, "99"]
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 confirmStake ["aa", 49, "99", 1]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d placeStake ["aa", 50, "99"]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d confirmStake ["aa", 50, "99", 1]
 
 
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 placeStake ["bb", 49, "1"]
-testinvoke 0xa91386899a915d8554fb26f979149c5c5ca5a1d7 confirmStake ["bb", 49, "1", 1]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d placeStake ["bb", 50, "1"]
+testinvoke 0x537dcceb6ef8840118b9166d98497947d3f2679d confirmStake ["bb", 50, "1", 1]

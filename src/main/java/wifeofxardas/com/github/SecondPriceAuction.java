@@ -181,7 +181,8 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
               Storage.currentContext(),
               Helper.concat(placerAddress, Helper.concat(Helper.asByteArray(".stakes."), id)));
 
-      if (Helper.asBigInteger(maxStake).compareTo(Helper.asBigInteger(placerStake)) <= 0) {
+      if (Helper.asBigInteger(maxStake).compareTo(Helper.asBigInteger(placerStake)) <= 0
+          && !Helper.asString(placerStake).equals("")) {
         if (Helper.asBigInteger(secondMax).compareTo(Helper.asBigInteger(maxStake)) <= 0) {
           secondMax = maxStake;
         }
@@ -260,7 +261,7 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
   public static Object placeStake(byte[] placer, byte[] id, byte[] stakeHash) {
     //      todo check witness
     if (!SecondPriceAuction.getLotState(id).equals("open")) {
-      Runtime.log("Can not find lot or it closed");
+      Runtime.log("Can not find lot or it is not in wait state");
       return "false";
     }
 
@@ -286,13 +287,13 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
   }
 
   public static String confirmStake(byte[] placer, byte[] id, byte[] stake, byte[] stakeSalt) {
-    if (SecondPriceAuction.getLotState(id).equals("canceled")) {
+    if (!SecondPriceAuction.getLotState(id).equals("wait")) {
       Runtime.log("Can not find lot or it canceled");
       return "false";
     }
 
     String currentPlacerStakeHash = SecondPriceAuction.getHashedStake(placer, id);
-
+    // todo return
     //    if (!currentPlacerStakeHash.equals(
     //        Helper.asString(SmartContract.sha256(Helper.concat(stake, stakeSalt))))) {
     //      Runtime.log("Hash does not equal stake + salt");
