@@ -44,8 +44,12 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
 
       return SecondPriceAuction.confirmStake(args[0], args[1], args[2], args[3]);
     } else if (operation.equals("setLotWinner")) {
-      SecondPriceAuction.setLotWinner(args[0]);
-      return "sdas";
+      if (args.length < 2) {
+        return false;
+      }
+
+      SecondPriceAuction.setLotWinner(args[0], args[1]);
+      return true;
     }
 
     Storage.put(Storage.currentContext(), "Greeting to the World", "Hello World!");
@@ -138,14 +142,26 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
     return "true";
   }
 
-  public static void setLotWinner(byte[] id) {
+  public static void setLotWinner(byte[] caller, byte[] id) {
+    if (!Runtime.checkWitness(caller) || !SecondPriceAuction.getLotState(id).equals("wait")) {
+      Runtime.log("can not set winner");
+      return;
+    }
+
     byte[] lotId = Helper.concat(Helper.asByteArray("lots."), id);
+    byte[] owner =
+        Storage.get(Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".owner")));
+
+    if (owner != caller) {
+      Runtime.log("unable to finish not owned lot");
+      return;
+    }
+
     BigInteger maxPlacerId =
         Helper.asBigInteger(
             Storage.get(
                 Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".stakes"))));
 
-    Runtime.log(Helper.asString(Helper.asByteArray(maxPlacerId)));
     byte[] maxStake = Helper.asByteArray(BigInteger.ZERO);
     byte[] secondMax = Helper.asByteArray(BigInteger.ZERO);
     byte[] winner = {};
