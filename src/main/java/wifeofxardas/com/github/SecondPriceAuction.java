@@ -200,6 +200,9 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
 
     Storage.put(
         Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".winner")), winner);
+
+    SecondPriceAuction.changeLotState(lotId, Helper.asByteArray("closed"));
+    SecondPriceAuction.deleteLotFromOwner(owner, id);
   }
 
   public static String deleteLotFromOwner(byte[] owner, byte[] id) {
