@@ -183,11 +183,13 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
 
       if (Helper.asBigInteger(maxStake).compareTo(Helper.asBigInteger(placerStake)) <= 0
           && !Helper.asString(placerStake).equals("")) {
-        if (Helper.asBigInteger(secondMax).compareTo(Helper.asBigInteger(maxStake)) <= 0) {
-          secondMax = maxStake;
-        }
         maxStake = placerStake;
         winner = placerAddress;
+      }
+
+      if ((Helper.asBigInteger(secondMax).compareTo(Helper.asBigInteger(placerStake)) < 0)
+          && (Helper.asBigInteger(maxStake).compareTo(Helper.asBigInteger(placerStake)) > 0)) {
+        secondMax = placerStake;
       }
 
       maxPlacerId = maxPlacerId.subtract(BigInteger.ONE);
