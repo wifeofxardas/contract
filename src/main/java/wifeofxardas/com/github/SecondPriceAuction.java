@@ -197,8 +197,10 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
 
     // if we have only one stake
     if (Helper.asString(secondMax).equals("")) {
-        secondMax = maxStake;
+      secondMax = maxStake;
     }
+
+    secondMax = Helper.asByteArray(Helper.asBigInteger(secondMax).add(BigInteger.ONE));
 
     Storage.put(
         Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".price")), secondMax);
