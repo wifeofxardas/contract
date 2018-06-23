@@ -195,6 +195,11 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
       maxPlacerId = maxPlacerId.subtract(BigInteger.ONE);
     }
 
+    // if we have only one stake
+    if (Helper.asString(secondMax).equals("")) {
+        secondMax = maxStake;
+    }
+
     Storage.put(
         Storage.currentContext(), Helper.concat(lotId, Helper.asByteArray(".price")), secondMax);
 
