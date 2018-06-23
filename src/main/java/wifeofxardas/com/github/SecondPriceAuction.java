@@ -264,9 +264,12 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
    * @return true\false
    */
   public static Object placeStake(byte[] placer, byte[] id, byte[] stakeHash) {
-    //      todo check witness
+    if (!Runtime.checkWitness(placer)) {
+      Runtime.log("you should not pass!!!");
+      return "false";
+    }
     if (!SecondPriceAuction.getLotState(id).equals("open")) {
-      Runtime.log("Can not find lot or it is not in wait state");
+      Runtime.log("can not find lot or it is not in wait state");
       return "false";
     }
 
@@ -292,18 +295,24 @@ public class SecondPriceAuction extends org.neo.smartcontract.framework.SmartCon
   }
 
   public static String confirmStake(byte[] placer, byte[] id, byte[] stake, byte[] stakeSalt) {
+    if (!Runtime.checkWitness(placer)) {
+      Runtime.log("you should not pass!!!");
+      return "false";
+    }
     if (!SecondPriceAuction.getLotState(id).equals("wait")) {
       Runtime.log("Can not find lot or it canceled");
       return "false";
     }
 
     String currentPlacerStakeHash = SecondPriceAuction.getHashedStake(placer, id);
-    // todo return
-    //    if (!currentPlacerStakeHash.equals(
-    //        Helper.asString(SmartContract.sha256(Helper.concat(stake, stakeSalt))))) {
-    //      Runtime.log("Hash does not equal stake + salt");
-    //      return "false";
-    //    }
+
+    Runtime.log(Helper.asString(SecondPriceAuction.sha256(Helper.concat(stake, stakeSalt))));
+
+    if (!currentPlacerStakeHash.equals(
+        Helper.asString(SecondPriceAuction.sha256(Helper.concat(stake, stakeSalt))))) {
+      Runtime.log("Hash does not equal stake + salt");
+      return "false";
+    }
 
     SecondPriceAuction.addStakeToUser(placer, id, stake);
 
