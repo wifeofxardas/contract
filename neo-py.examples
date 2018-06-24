@@ -1,20 +1,20 @@
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 getLots ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y"]
-testinvoke 0x4734e17a0e6382ea4134672ef3288f06f3967814 setLotWinner ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "51"]
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 openLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "name", "desc"]
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 placeStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "aaa"]
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 confirmStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "aaa", 1]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 getLots ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y"]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 setLotWinner ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "51"]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 openLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "name", "desc"]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 placeStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "aaa"]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 confirmStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "aaa", 1]
 
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 closeLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 closeLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49]
 
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 openLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "name", "desc"]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 openLot ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", "name", "desc"]
 
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 placeStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "55"]
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 confirmStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "55", 1]
-
-
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 placeStake ["aa", 49, "99"]
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 confirmStake ["aa", 49, "99", 1]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 placeStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "55"]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 confirmStake ["AK2nJJpJr6o664CWJKi1QRXjqeic2zRp8y", 49, "55", 1]
 
 
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 placeStake ["bb", 49, "1"]
-testinvoke 0x7cd35e266634f83f37de744e7fa612852e383251 confirmStake ["bb", 49, "1", 1]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 placeStake ["aa", 49, "99"]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 confirmStake ["aa", 49, "99", 1]
+
+
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 placeStake ["bb", 49, "1"]
+testinvoke 0xe6fa5526029495f7569693beb4e6896ccad870e8 confirmStake ["bb", 49, "1", 1]
